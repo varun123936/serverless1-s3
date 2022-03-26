@@ -1,0 +1,51 @@
+service: serverless1-s3
+
+custom:
+  bucketName: s3-serverless-bucket
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  environment:
+    bucketName: ${self:custom.bucketName}
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "s3:ListBucket"
+      - "s3:PutObject"
+      - "s3:GetObject"
+      - "s3:DeleteObject"
+    Resource:
+      - "arn:aws:s3:::s3-serverless-bucket/*"
+
+        
+functions:
+  createFile:
+    handler: createFile.handler
+    events:
+    - http:
+        path: /create-file/{fileName}
+        method: post
+        cors: true
+  getFile:
+    handler: getFile.handler
+    events:
+    - http:
+        path: /get-file/{fileName}
+        method: get
+        cors: true
+  deleteFile:
+    handler: deleteFile.handler
+    events:
+    - http:
+        path: /delete-file/{fileName}
+        method: delete
+        cors: true
+
+
+resources:
+  Resources:
+    MyS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
